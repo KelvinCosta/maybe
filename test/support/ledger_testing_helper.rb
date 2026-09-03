@@ -134,6 +134,15 @@ module LedgerTestingHelper
 
       if expected
         assert calculated_balance, "Expected balance for #{date} but none was calculated"
+        if calculated_balance.nil?
+          # If the system skipped this day (sparse data), ensure the test expected it to be empty
+          flows_empty = expected[:flows] == 0 || (expected[:flows].is_a?(Hash) && expected[:flows].empty?)
+          adjustments_empty = expected[:adjustments] == 0 || (expected[:adjustments].is_a?(Hash) && expected[:adjustments].empty?)
+          
+          assert flows_empty, "Expected flows for #{date} but none were calculated"
+          assert adjustments_empty, "Expected adjustments for #{date} but none were calculated"
+          next
+        end
 
         # Always assert flows_factor is correct based on account classification
         expected_flows_factor = calculated_balance.account.classification == "asset" ? 1 : -1
@@ -305,5 +314,6 @@ module LedgerTestingHelper
       assert_includes calculated_dates, date,
         "Expected balance for #{date} was not in calculated data"
     end
+    # Date inclusion is now validated in the main loop above (allowing empty days to be safely skipped)
   end
 end

@@ -11,6 +11,8 @@ class Balance::ReverseCalculator < Balance::BaseCalculator
 
       # Calculates in reverse-chronological order (End of day -> Start of day)
       account.current_anchor_date.downto(account.opening_anchor_date).map do |date|
+      dates_to_calculate = (sync_cache.relevant_dates + [account.current_anchor_date, account.opening_anchor_date]).uniq.sort.reverse
+      dates_to_calculate.select { |d| d <= account.current_anchor_date && d >= account.opening_anchor_date }.map do |date|
         flows = flows_for_date(date)
 
         if use_opening_anchor_for_date?(date)

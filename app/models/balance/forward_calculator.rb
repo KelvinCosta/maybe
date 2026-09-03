@@ -8,6 +8,8 @@ class Balance::ForwardCalculator < Balance::BaseCalculator
       start_non_cash_balance = account.opening_anchor_balance - start_cash_balance
 
       calc_start_date.upto(calc_end_date).map do |date|
+      dates_to_calculate = (sync_cache.relevant_dates + [calc_start_date, calc_end_date]).uniq.sort
+      dates_to_calculate.select { |d| d >= calc_start_date && d <= calc_end_date }.map do |date|
         valuation = sync_cache.get_valuation(date)
 
         if valuation
